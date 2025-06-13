@@ -1,24 +1,28 @@
 ﻿using CalculatorApp.Application;
 using CalculatorApp.Application.Auth;
+using CalculatorApp.Application.Extensions;
 using CalculatorApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _config;
+    private readonly JwtOptions _jwtOptions;
 
-    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration config)
+    public AuthController(UserManager<ApplicationUser> userManager, IConfiguration config, IOptions<JwtOptions> options)
     {
         _userManager = userManager;
         _config = config;
+        _jwtOptions = options.Value;
     }
 
     [HttpPost("register")]
@@ -40,29 +44,12 @@ public class AuthController : ControllerBase
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             return Unauthorized("Неверный email или пароль");
 
-        var token = GenerateJwtToken(user);
+        var token = GenerateJwtToken(user, _jwtOptions, "user");
         return Ok(new { token });
     }
 
-    private string GenerateJwtToken(ApplicationUser user)
+    private string GenerateJwtToken(ApplicationUser user, JwtOptions jwtOptions, string role)
     {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id)
-        };
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(_config["Jwt:ExpiresInMinutes"])),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return user.GenerateJWTAuthorizeToken(jwtOptions, role);
     }
 }

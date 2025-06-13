@@ -7,7 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CalculatorApp.Domain\CalculatorApp.Domain.csproj" />
+    <ProjectReference Include="..\CalculatorApp.Persistence\CalculatorApp.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
