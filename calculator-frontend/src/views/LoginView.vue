@@ -1,14 +1,14 @@
 <template>
-  <div class="login">
+  <div class="container">
     <h2>Вход</h2>
-    <form @submit.prevent="login">
+    <form @submit.prevent="login" class="form">
       <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Пароль" required />
       <button type="submit">Войти</button>
+      <p v-if="error" class="error-message">{{ error }}</p>
     </form>
-    <p v-if="error" style="color: red">{{ error }}</p>
+    <router-link to="/register">Нет аккаунта? Зарегистрироваться</router-link>
   </div>
-  <router-link to="/register">Нет аккаунта? Зарегистрироваться</router-link>
 </template>
 
 <script lang="ts">

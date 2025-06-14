@@ -130,4 +130,27 @@ li:last-child {
 .log-result.error {
   color: red;
 }
+
+.container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 30px 25px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+  background-color: #fff;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.form input {
+  display: block;
+  width: 100%;
+  padding: 12px 10px;
+  margin: 12px -10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  transition: border-color 0.3s;
+}
 </style>
