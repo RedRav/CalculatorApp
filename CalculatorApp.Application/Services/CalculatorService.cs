@@ -16,7 +16,7 @@ public class CalculatorService : ICalculatorService
                 "+" => request.A + request.B,
                 "-" => request.A - request.B,
                 "*" => request.A * request.B,
-                "/" => request.B == 0 ? throw new DivideByZeroException() : request.A / request.B,
+                "/" => request.B == 0 ? throw new DivideByZeroException("Нельзя делить на 0") : request.A / request.B,
                 "pow" => Math.Pow(request.A, request.B),
                 "root" => request.B == 0 ? throw new Exception("Основание не может быть 0") : Math.Pow(request.A, 1.0 / request.B),
                 _ => throw new ArgumentException("Недопустимая операция")
