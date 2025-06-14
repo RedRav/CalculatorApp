@@ -20,7 +20,7 @@ public class CalculatorController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var result = await _service.CalculateAsync(request, userId);
 
-        if (result.Message != null)
+        if (result.Message != "OK")
             return BadRequest(result);
 
         return Ok(result);

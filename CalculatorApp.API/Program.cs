@@ -30,6 +30,18 @@ namespace CalculatorApp.API
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Jwt));
             builder.Services.AddJwtAuthorize(builder.Configuration);
 
+            // Добавляем CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:8080")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
             // Add services to the container.
             builder.Services.AddAuthorization();
 
@@ -71,6 +83,8 @@ namespace CalculatorApp.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("AllowFrontend"); // Включаем CORS с нужной политикой
 
             // Configure the HTTP request pipeline.
 
