@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CalculatorApp.Application\CalculatorApp.Application.csproj" />
     <ProjectReference Include="..\CalculatorApp.Domain\CalculatorApp.Domain.csproj" />
-    <ProjectReference Include="..\CalculatorApp.Infrastructure\CalculatorApp.Infrastructure.csproj" />
     <ProjectReference Include="..\CalculatorApp.Persistence\CalculatorApp.Persistence.csproj" />
   </ItemGroup>
 

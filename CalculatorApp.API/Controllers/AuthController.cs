@@ -15,13 +15,11 @@ using System.Text;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IConfiguration _config;
     private readonly JwtOptions _jwtOptions;
 
     public AuthController(UserManager<ApplicationUser> userManager, IConfiguration config, IOptions<JwtOptions> options)
     {
         _userManager = userManager;
-        _config = config;
         _jwtOptions = options.Value;
     }
 

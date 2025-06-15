@@ -81,7 +81,8 @@ export default defineComponent({
         );
         result.value = response.data.result;
       } catch (e: any) {
-        error.value = e.response?.data?.error || "Ошибка запроса";
+        error.value =
+          e.response?.data?.message || e.message || "Ошибка запроса";
       }
       await loadLogs();
     }

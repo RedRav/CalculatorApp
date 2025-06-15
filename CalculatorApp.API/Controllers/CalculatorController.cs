@@ -21,7 +21,10 @@ public class CalculatorController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Calculate([FromBody] CalculatorRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
         var result = await _service.CalculateAsync(request, userId);
 
         if (result.Message != "OK")
@@ -31,10 +34,11 @@ public class CalculatorController : ControllerBase
     }
 
     [HttpGet("logs")]
-    [Authorize]
     public async Task<IActionResult> GetLogs()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
 
         var logs = await _db.CalculationLogs
             .Where(x => x.UserId == userId)
@@ -48,19 +52,33 @@ public class CalculatorController : ControllerBase
                 x.Error,
                 x.Timestamp
             })
-        .ToListAsync();
+            .ToListAsync();
 
         return Ok(logs);
     }
 
     [HttpDelete("logs")]
-    [Authorize]
     public async Task<IActionResult> ClearLogs()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var logs = _db.CalculationLogs.Where(x => x.UserId == userId);
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var logs = await _db.CalculationLogs
+            .Where(x => x.UserId == userId)
+            .ToListAsync();
+
+        if (logs.Count == 0)
+            return NoContent();
+
         _db.CalculationLogs.RemoveRange(logs);
         await _db.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private string? GetUserId()
+    {
+        return User.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 }

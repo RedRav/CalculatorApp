@@ -18,18 +18,26 @@ public class CalculatorService : ICalculatorService
                 "*" => request.A * request.B,
                 "/" => request.B == 0 ? throw new DivideByZeroException("Нельзя делить на 0") : request.A / request.B,
                 "pow" => Math.Pow(request.A, request.B),
-                "root" => request.B == 0 ? throw new Exception("Основание не может быть 0") : Math.Pow(request.A, 1.0 / request.B),
+                "root" => request.B == 0 ? throw new ArgumentException("Основание не может быть 0") : Math.Pow(request.A, 1.0 / request.B),
                 _ => throw new ArgumentException("Недопустимая операция")
             };
         }
         catch (Exception ex)
         {
             await LogAsync(request, 0, userId, ex.Message);
-            return new CalculatorResponse { Result = 0, Message = ex.Message };
+            return new CalculatorResponse
+            {
+                Result = 0,
+                Message = ex.Message
+            };
         }
 
         await LogAsync(request, result, userId);
-        return new CalculatorResponse { Result = result };
+        return new CalculatorResponse
+        {
+            Result = result,
+            Message = "OK"
+        };
     }
 
     private async Task LogAsync(CalculatorRequest req, double result, string userId, string? error = null)

@@ -17,43 +17,49 @@ namespace CalculatorApp.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            ConfigureServices(builder.Services, builder.Configuration);
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            var app = builder.Build();
+
+            ConfigureMiddleware(app);
+
+            app.Run();
+        }
+
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            var jwtSettings = builder.Configuration.GetSection("Jwt");
-            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+            services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.Jwt));
+            services.AddJwtAuthorize(configuration);
 
-            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Jwt));
-            builder.Services.AddJwtAuthorize(builder.Configuration);
-
-            // Добавляем CORS
-            builder.Services.AddCors(options =>
+            services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontend",
-                    policy =>
-                    {
-                        policy.WithOrigins("http://localhost:8080")
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    });
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:8080")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
             });
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
+            services.AddScoped<ICalculatorService, CalculatorService>();
 
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            services.AddControllers();
 
-            builder.Services.AddSwaggerGen(c =>
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Calculator API", Version = "v1" });
+
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "Введите токен в формате: Bearer {токен}",
+                    Description = "Введите JWT токен: Bearer {токен}",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
@@ -62,42 +68,33 @@ namespace CalculatorApp.API
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        {
-            new OpenApiSecurityScheme {
-                Reference = new OpenApiReference {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme {
+                            Reference = new OpenApiReference {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
+        }
 
-            builder.Services.AddScoped<ICalculatorService, CalculatorService>();
-
-            var app = builder.Build();
-
+        private static void ConfigureMiddleware(WebApplication app)
+        {
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("AllowFrontend"); // Включаем CORS с нужной политикой
-
-            // Configure the HTTP request pipeline.
-
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowFrontend");
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
-
-            app.Run();
         }
     }
 }

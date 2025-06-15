@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36203.30 d17.14
+VisualStudioVersion = 17.14.36203.30
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp.API", "CalculatorApp.API\CalculatorApp.API.csproj", "{50302C12-B6DB-4FFC-8A18-CD6BC5D6BCB4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp.Application", "CalculatorApp.Application\CalculatorApp.Application.csproj", "{5C731F42-D5CD-4882-94E2-67FCC1DE2692}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp.Domain", "CalculatorApp.Domain\CalculatorApp.Domain.csproj", "{C6001BD5-E869-4233-AE43-26E48D755D46}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp.Infrastructure", "CalculatorApp.Infrastructure\CalculatorApp.Infrastructure.csproj", "{4053959D-4594-42FD-95AB-6415F6DF7006}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorApp.Persistence", "CalculatorApp.Persistence\CalculatorApp.Persistence.csproj", "{B7BE39A8-EBA8-47C8-8BA8-ADD1A4A9B03A}"
 EndProject
@@ -31,10 +29,6 @@ Global
 		{C6001BD5-E869-4233-AE43-26E48D755D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6001BD5-E869-4233-AE43-26E48D755D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6001BD5-E869-4233-AE43-26E48D755D46}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4053959D-4594-42FD-95AB-6415F6DF7006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4053959D-4594-42FD-95AB-6415F6DF7006}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4053959D-4594-42FD-95AB-6415F6DF7006}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4053959D-4594-42FD-95AB-6415F6DF7006}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B7BE39A8-EBA8-47C8-8BA8-ADD1A4A9B03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B7BE39A8-EBA8-47C8-8BA8-ADD1A4A9B03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7BE39A8-EBA8-47C8-8BA8-ADD1A4A9B03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
