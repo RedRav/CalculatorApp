@@ -1,5 +1,6 @@
 ﻿using CalculatorApp.Domain.Entities;
 using CalculatorApp.Persistence;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class CalculatorService : ICalculatorService
 {
@@ -9,6 +10,14 @@ public class CalculatorService : ICalculatorService
     public async Task<CalculatorResponse> CalculateAsync(CalculatorRequest request, string userId)
     {
         double result;
+        var log = new CalculationLog
+        {
+            Operand1 = request.A,
+            Operand2 = request.B,
+            Operation = request.Operation,
+            UserId = userId,
+            Timestamp = DateTime.UtcNow,
+        };
         try
         {
             result = request.Operation switch
@@ -21,10 +30,13 @@ public class CalculatorService : ICalculatorService
                 "root" => request.B == 0 ? throw new ArgumentException("Основание не может быть 0") : Math.Pow(request.A, 1.0 / request.B),
                 _ => throw new ArgumentException("Недопустимая операция")
             };
+            log.Result = result;
         }
         catch (Exception ex)
         {
-            await LogAsync(request, 0, userId, ex.Message);
+            log.Error = ex.Message;
+            log.Result = 0;
+            await LogAsync(log);
             return new CalculatorResponse
             {
                 Result = 0,
@@ -32,7 +44,7 @@ public class CalculatorService : ICalculatorService
             };
         }
 
-        await LogAsync(request, result, userId);
+        await LogAsync(log);
         return new CalculatorResponse
         {
             Result = result,
@@ -40,6 +52,11 @@ public class CalculatorService : ICalculatorService
         };
     }
 
+    private async Task LogAsync(CalculationLog log)
+    {
+        _db.CalculationLogs.Add(log);
+        await _db.SaveChangesAsync();
+    }
     private async Task LogAsync(CalculatorRequest req, double result, string userId, string? error = null)
     {
         var log = new CalculationLog
@@ -53,6 +70,12 @@ public class CalculatorService : ICalculatorService
             Error = error
         };
         _db.CalculationLogs.Add(log);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task LogAsync(List<CalculationLog> logs)
+    {
+        _db.CalculationLogs.AddRange(logs);
         await _db.SaveChangesAsync();
     }
 }

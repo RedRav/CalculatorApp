@@ -1,4 +1,6 @@
-﻿using CalculatorApp.Persistence;
+﻿using CalculatorApp.Application.Helpers;
+using CalculatorApp.Domain.Entities;
+using CalculatorApp.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,16 +35,81 @@ public class CalculatorController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
+    [HttpPost("randomData")]
+    public async Task<IActionResult> Fill([FromBody] string userId)
+    {
+        var logs = new List<CalculationLog>();
+        Random random = new Random();
+        var arr = new[] { "+", "-", "*", "/", "pow", "root" };
+        var date = DateTime.UtcNow;
+        for (int i = 0; i < 1_000_000; i++)
+        {
+            date.AddHours(random.Next(-1000, 1000));
+            var log = new CalculationLog()
+            {
+                Operand1 = random.Next(0, 1000),
+                Operand2 = random.Next(0, 1000),
+                Result = 228,
+                Operation = arr[random.Next(0, arr.Length - 1)],
+                UserId = userId,
+                Timestamp = date,
+            };
+            logs.Add(log);
+            Console.WriteLine($"Операция {i}");
+        }
+        await _service.LogAsync(logs);
+
+        return Ok();
+    }
+
     [HttpGet("logs")]
-    public async Task<IActionResult> GetLogs()
+    public async Task<IActionResult> GetLogs([FromQuery] int offset = 0, [FromQuery] int pageSize = 10)
     {
         var userId = GetUserId();
         if (userId == null)
             return Unauthorized();
 
-        var logs = await _db.CalculationLogs
+        IQueryable<CalculationLog> query = _db.CalculationLogs
             .Where(x => x.UserId == userId)
-            .OrderByDescending(x => x.Timestamp)
+            .OrderByDescending(x => x.Timestamp);
+
+        query = PaginationHelper.OffsetPagination(query, offset, pageSize);
+
+        var logs = await query
+            .Select(x => new
+            {
+                x.Operation,
+                x.Operand1,
+                x.Operand2,
+                x.Result,
+                x.Error,
+                x.Timestamp
+            })
+            .ToListAsync();
+
+        return Ok(logs);
+    }
+
+    [HttpGet("logs/cursor")]
+    public async Task<IActionResult> GetLogsCursor(
+    [FromQuery] DateTime? cursor = null,
+    [FromQuery] int pageSize = 10)
+    {
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var query = _db.CalculationLogs
+            .Where(x => x.UserId == userId);
+
+        query = PaginationHelper.CursorPagination(
+            query,
+            x => x.Timestamp,
+            cursor,
+            pageSize);
+
+        var logs = await query
             .Select(x => new
             {
                 x.Operation,
@@ -76,6 +143,7 @@ public class CalculatorController : ControllerBase
 
         return NoContent();
     }
+
 
     private string? GetUserId()
     {

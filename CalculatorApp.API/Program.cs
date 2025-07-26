@@ -91,7 +91,7 @@ namespace CalculatorApp.API
 
             app.UseHttpsRedirection();
             app.UseCors("AllowFrontend");
-            app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

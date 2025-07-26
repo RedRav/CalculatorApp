@@ -37,6 +37,11 @@
         </div>
       </li>
     </ul>
+    <div style="margin-top: 10px">
+      <button :disabled="currentPage === 1" @click="prevPage">← Назад</button>
+      <span style="margin: 0 10px">Страница {{ currentPage }}</span>
+      <button :disabled="logs.length < pageSize" @click="nextPage">Вперёд →</button>
+    </div>
     <div v-if="error" style="color: red">Ошибка: {{ error }}</div>
   </div>
 </template>
@@ -58,7 +63,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const logs = ref<Array<any>>([]);
-
+      
     onMounted(() => {
       loadLogs();
     });
@@ -87,13 +92,18 @@ export default defineComponent({
       await loadLogs();
     }
 
+    const currentPage = ref(1);
+    const pageSize = 10;
+
     async function loadLogs() {
       try {
         const token = store.state.token;
+        const offset = (currentPage.value - 1) * pageSize;
         const response = await axios.get(
           "https://localhost:7100/api/calculator/logs",
           {
             headers: { Authorization: `Bearer ${token}` },
+            params: { offset, limit: pageSize},
           }
         );
         logs.value = response.data;
@@ -138,6 +148,18 @@ export default defineComponent({
       router.push("/login");
     };
 
+    function nextPage() {
+      currentPage.value++;
+      loadLogs();
+    }
+
+    function prevPage() {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+        loadLogs();
+      }
+    }
+
     return {
       A,
       B,
@@ -149,6 +171,10 @@ export default defineComponent({
       logs,
       operationSymbol,
       clearHistory,
+      currentPage,
+      nextPage,
+      prevPage,
+      pageSize,
     };
   },
 });
